@@ -1,4 +1,4 @@
-Date,Relative Humidity (%),Solar Radiation (watts/sq meter),Atmosphere Pressure (mb),Wind Speed (m/sec),Wind Direction (degrees),Battery (volts),Air Temperature (°C),ParametersOutOfRange
+Date,Relative Humidity (%),Solar Radiation (watts/sq meter),Atmosphere Pressure (mb),Wind Speed (m/sec),Wind Direction (degrees),Battery (V),Air Temperature (°C),ParametersOutOfRange
 5/1/2012 0:00,78.8,0,1012,0.51,305.7,12.89,8.65,
 5/1/2012 1:00,77.9,0,1012,0.56,318.4,12.88,8.58,
 5/1/2012 2:00,79.5,0,1012,0.48,319.2,12.86,8.61,

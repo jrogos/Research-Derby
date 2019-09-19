@@ -200,6 +200,7 @@ lines(PP_WQ_PAR_cone$doy.y[PP_WQ_PAR_cone$depth2 == 1 & PP_WQ_PAR_cone$year == 2
      PP_WQ_PAR_cone$NTU[PP_WQ_PAR_cone$depth2 == 1 & PP_WQ_PAR_cone$year == 2015 & PP_WQ_PAR_cone$doy.y >= 182 & PP_WQ_PAR_cone$doy.y <= 250]/1000,
      type = "l", ylab = "Daily phytoplankton production (g C m-2)", xlab = "Dates",
      ylim = c(0.01,0.5))
+x
 
 PP_WQ_PAR_cone$date[PP_WQ_PAR_cone$depth2 == 1 & PP_WQ_PAR_cone$year == 2015 & PP_WQ_PAR_cone$doy.y >= 182 & PP_WQ_PAR_cone$doy.y <= 250]
 PP_WQ_PAR_cone$TPP[PP_WQ_PAR_cone$depth2 == 1 & PP_WQ_PAR_cone$year == 2015 & PP_WQ_PAR_cone$doy.y >= 182 & PP_WQ_PAR_cone$doy.y <= 250]

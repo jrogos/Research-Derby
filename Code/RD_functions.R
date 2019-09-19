@@ -245,9 +245,13 @@ PPdepth_func <- function(PPmax, Izt, Ik = 217.5, Vzdel, daylength) {
   # make sure Izt (eqn 7) only includes times between sunrise and sunset
   # Ik constant for phytoplankton
   # Vzdel is lake Volume as cross section between depth z and previous depth.
+<<<<<<< HEAD
   PPmax*tanh(Izt/Ik)*Vzdel*daylength 
   # WQ_PAR_cone$PP_max*tanh(WQ_PAR_cone$Izt/217.5)*(WQ_PAR_cone$VOL_M3_CROSS_SECTION)*WQ_PAR_cone$daylight 
   # (daylength)*sum(PPmax*tanh(Izt/Ik)*(Vzdel), na.rm = TRUE)
+=======
+  PPmax*tanh(Izt/Ik)*(Vzdel)*daylength # (daylight)*sum(PPmax*tanh(Izt/Ik)*(Vzdel), na.rm = TRUE)
+>>>>>>> 3edb209e79658fd577d6abcc397c954950667321
   # we only want primary production at depth at the time the measurement was taken (because using real data). 
   # Then later we will sum the primary production at each depth for each day using dplyr or something.
   # Keep it simple.
