@@ -8,10 +8,10 @@ clear_to_surface <- function(AOD, CS_PAR, B0 = -0.322868, B1 = -0.371085) {
 # Literature reference for most equations: Sources/Vadeboncoeur et al. 2008 Ecology
 
 # Eq 4 ------------------------------------------------------------------------------------------------------------
-# Phytoplankton productivity (PP; mg Cm-3 s-1)
+# Phytoplankton productivity (PP; supposed to be mg C/m-3 h-1)
 
 PPmax_func <- function(chl) {
-  (chl*2.2) / 3600 # chl is chlorophyll a input
+  (chl*2.2) # chl is chlorophyll a input. Units = micrograms/L or mg/m^3 (b/c 1000/1000 = 1, go figure)
 }
 
 # Eq 5 ------------------------------------------------------------------------------------------------------------
@@ -206,10 +206,15 @@ findPeaks <- function(dataIn, thresh=0){
 # Light attenuation coefficient at depth Kd
 # Kd = Kb + 0.015[Chla]
 
-#Kb <- 0.8 # based on parameters in Arhonditsis paper
+# Kb <- 0.8 m^-1 # based on parameters in Arhonditsis paper (0.8 for moderately clear lakes, 2.0 for turbid, 0.2 for oligo)
+# [Chla] must be in units of mg*m^-3
+  # 1000 L = 1 m^3
+  # 1000 ug = 1 mg
+  # 1000/1000 = 1
+# 0.015 m^2/(mg(Chl)^-1) according to Krause-Jensen & Sand-Jensen 1998 paper where the chlorophyll specific attenuation coefficient came from
 
-Light_atten_func <- function(chl, kb = 0.8) {
-  Kb + 0.015*chl
+Light_atten_func <- function(chl, Kb = 0.8) {
+  Kb + 0.015*chl # units: m^-1
 }
 
 # Using linear regression for surface light equation from AOD -------------------------------------------------------------------------------------
@@ -227,43 +232,47 @@ Izt_func <- function(I0t, Kd, z) {
 
 # Eq 9 --------------------------------------------------------------------------------------------------------------
 # daily phytoplankton primary production at depth z (mg C)
-# Ik: 306.8 umol photons/m2/s phytoplankton based on comm composition for lake washington by Arhoditsis et al. 2003
+# Ik: 217.5 umol photons/m2/s phytoplankton based on comm composition for lake washington by Arhoditsis et al. 2003
 # mix of diatoms, chlorophytes, cyanobacteria -- weighted by relative community composition from literature values
 # Citations:
 # Cyano: Schuurmans et al. 2015 PLOSONE, Olaizola and Duerr 1990 J App Phycology, Luimstra et al. 2018 Photosynthesis Res
 # Diatoms: Heiden et al. 2016 Frontiers in Mar Sci
 # Chlorophytes: Xu et al. 2016 Plant phys and biochem
 
-PPdepth_func <- function(dayLength, PPmax, Izt, Ik = 306.8, Vzdel) {
+PPdepth_func <- function(PPmax, Izt, Ik = 217.5, Vzdel, daylength) {
   # daylength must be in seconds between sunrise and sunset
   # PPmax (eqn 4)
   # make sure Izt (eqn 7) only includes times between sunrise and sunset
   # Ik constant for phytoplankton
-  # Vzdel is lake Volume as slice between depth z and previous depths.
-  dayLength*sum(PPmax*tanh(Izt/Ik)*(Vzdel))
+  # Vzdel is lake Volume as cross section between depth z and previous depth.
+  PPmax*tanh(Izt/Ik)*(Vzdel)*daylength # (daylight)*sum(PPmax*tanh(Izt/Ik)*(Vzdel), na.rm = TRUE)
+  # we only want primary production at depth at the time the measurement was taken (because using real data). 
+  # Then later we will sum the primary production at each depth for each day using dplyr or something.
+  # Keep it simple.
 }
 
 # Eqn 10 ------------------------------------------------------------------------------------------------------------
 # daily whole-lake phytoplankton production, TPP (mg C/m squared)
 # A0 surface area in meters squared
-TPP_func <- function(PPdepth, A0 = 75713400) {
-  sum(PPdepth)/A0
+TPP_func <- function(PPdepth, A0 = 190613600) { # A0 = 190613600, cartoon cone estimate: 75713400
+  sum(PPdepth, na.rm = TRUE)/A0 #  sum(PPdepth, na.rm = TRUE)/A0 # don't need to divide by surface area because adding all the surfaces together from actual data
 }
+#?apply NEED TO ADD A FOR LOOP SO THAT THIS IS SUMMARIZED BY DAY
+
 
 # Eqn 11 ------------------------------------------------------------------------------------------------------------
 # Periphyton: Sources/Austin and Hill 1991 Limno and Ocean
-#Ik is 217.5 umol photons/m2/s
+#Ik is 306.8 umol photons/m2/s
 # BPmax: 50 mg C per meter per hour (convert to seconds) for mesotrophic lakes with unconsolidated sediments. 
 # daily benthic primary production, BP, at depth z (mg C)
-# WARNING: LAKE WASHINGTON IS NOT A CONE THIS IS ROUGH APPROXIMATION OF BENTHIC PRIMARY PRODUCTIVITY FOR RD 
-# b/c don't have bathymetry
-BPz_func <- function(dayLength, BPmax = 0.0139, Izt, Ik = 217.5, Azdel) {
-  daylength*sum(BPmax*tanh(Izt/Ik)*Azdel)
+#
+BPz_func <- function(BPmax = 50, Izt, Ik = 306.8, Azdel) {
+  BPmax*tanh(Izt/Ik)*Azdel
 }
 
 # Eqn 12 --------------------------------------------------------------------------------------------------------------
 # daily whole-lake periphyton production, TBP mg C per meter squared
-TBP <- function(BPz, A0 = 75713400) {
-  sum(BPz)/A0
+TBP_func <- function(BPz, A0 = 190613600) { # , A0 = 190613600
+  sum(BPz, na.rm = TRUE)/A0 # sum(BPz)/A0 # don't need to divide by surface area because adding all the surfaces together from actual data
 }
 
