@@ -39,19 +39,25 @@ numberOfDays <- function(date) {
 date <- as.Date("2014-08-01", "%Y-%m-%d")
 numberOfDays(date) #But Jul and Aug always have 31 d ;)
 
-grid <- expand.grid(hour=seq(1,24,0.25), day=1:31, month=7:8, year=2013:2018, timezone=-8, lat=47.6292991, lon=-122.254822)# every 15 mins to match aquarium data
-grid
+grid <- expand.grid(hour=seq(1,24,0.25), day=1:31, month=c(5, 7, 8, 10), year=2013:2018, 
+                    timezone=-8, lat=47.6292991, lon=-122.254822)# every 15 mins to match aquarium data
+grid2 <- expand.grid(hour=seq(1,24,0.25), day=1:30, month=c(6, 9), year=2013:2018, 
+                    timezone=-8, lat=47.6292991, lon=-122.254822)# every 15 mins to match aquarium data
 
 ??atrocalc4r
-data <- astrocalc4r(grid$day, grid$month, grid$year, grid$hour, grid$timezone, grid$lat, grid$lon, withinput = TRUE, #
+data_MJAO <- astrocalc4r(grid$day, grid$month, grid$year, grid$hour, grid$timezone, grid$lat, grid$lon, withinput = TRUE, #
             seaorland = "continental", acknowledgment = FALSE)
+data_JS <- astrocalc4r(grid2$day, grid2$month, grid2$year, grid2$hour, grid2$timezone, grid2$lat, grid2$lon, withinput = TRUE, #
+                    seaorland = "continental", acknowledgment = FALSE)
 
 data$PAR #Currently in W/m2 #Need in particle flux of uE/s/m2
-data$PAR_particleFlux <- data$PAR * 4.57
+data_MJAO$PAR_particleFlux <- data_MJAO$PAR * 4.57
+data_JS$PAR_particleFlux <- data_JS$PAR * 4.57
 
 colnames(data) #Just to check...
-length(data$PAR) #34596
-length(data$PAR_particleFlux) #34596
+length(data_JS$PAR) #33480
+length(data_MJAO$PAR) #69192
+length(data_JS$PAR_particleFlux) #33480
 data$PAR #Obs 997 = 1.50165708e+02
 data$PAR_particleFlux #Obs 997 = 6.86257287e+02
 
@@ -60,7 +66,9 @@ data$PAR_particleFlux #Obs 997 = 6.86257287e+02
     # data$dayLength <- (data$sunset - data$sunrise) * 60 * 60
     # data$dayLength
     # colnames(data) #Just to check...
-PARcs_df <- data # name used in LakeWA_WQ_meteor.R file for now
+data_MJJASO <- union(data_MJAO, data_JS) 
+
+PARcs_df <- data_MJJASO # name used in LakeWA_WQ_meteor.R file for now
 
 saveRDS(PARcs_df,"Output/PAR_clear_sky.RDS")
 
